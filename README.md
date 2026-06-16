@@ -11,6 +11,7 @@ No GUI clicking, no settings panels. Just `as set --playback "Headphones"` and y
 ![Native AOT](https://img.shields.io/badge/Native%20AOT-single%20~3MB%20exe-success)
 ![No runtime](https://img.shields.io/badge/runtime-none%20required-brightgreen)
 ![Built with](https://img.shields.io/badge/built%20with-Spectre.Console-ff69b4)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
 </div>
 
@@ -208,8 +209,7 @@ The code is organised by responsibility:
 
 ## 📜 License
 
-No license has been chosen yet, so the project is **all rights reserved** by default.
-Add a `LICENSE` file (e.g. MIT) to make it open source.
+Released under the [MIT License](LICENSE). © 2026 Gabriele Castellani.
 
 ---
 
