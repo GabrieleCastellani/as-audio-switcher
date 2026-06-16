@@ -7,6 +7,7 @@
 No GUI clicking, no settings panels. Just `as set --playback "Headphones"` and you're done.
 
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D6?logo=windows&logoColor=white)
+[![CI](https://github.com/GabrieleCastellani/as-audio-switcher/actions/workflows/ci.yml/badge.svg)](https://github.com/GabrieleCastellani/as-audio-switcher/actions/workflows/ci.yml)
 ![.NET](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white)
 ![Native AOT](https://img.shields.io/badge/Native%20AOT-single%20~3MB%20exe-success)
 ![No runtime](https://img.shields.io/badge/runtime-none%20required-brightgreen)
