@@ -56,11 +56,8 @@ internal static class ListCommand
         }
         catch (Exception ex)
         {
-            AnsiConsole.MarkupLine($"[red]Error:[/] {Markup.Escape(InnermostMessage(ex))}");
+            AnsiConsole.MarkupLine($"[red]Error:[/] {Markup.Escape(CliFormat.InnermostMessage(ex))}");
             return 1;
         }
     }
-
-    private static string InnermostMessage(Exception ex) =>
-        ex.InnerException is { } inner ? InnermostMessage(inner) : ex.Message;
 }

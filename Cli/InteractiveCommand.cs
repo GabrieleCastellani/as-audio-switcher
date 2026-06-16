@@ -31,7 +31,7 @@ internal static class InteractiveCommand
         }
         catch (Exception ex)
         {
-            AnsiConsole.MarkupLine($"[red]Error:[/] {Markup.Escape(ex.Message)}");
+            AnsiConsole.MarkupLine($"[red]Error:[/] {Markup.Escape(CliFormat.InnermostMessage(ex))}");
             return 1;
         }
     }
@@ -117,14 +117,14 @@ internal static class InteractiveCommand
         }
     }
 
-    private static IReadOnlyList<AudioDevice?> BuildItems(IReadOnlyList<AudioDevice> devices)
+    internal static IReadOnlyList<AudioDevice?> BuildItems(IReadOnlyList<AudioDevice> devices)
     {
         var items = new List<AudioDevice?> { null };
         items.AddRange(devices);
         return items;
     }
 
-    private static int InitialCursor(IReadOnlyList<AudioDevice?> items, RoleTarget target)
+    internal static int InitialCursor(IReadOnlyList<AudioDevice?> items, RoleTarget target)
     {
         for (var i = 1; i < items.Count; i++)
         {
@@ -139,7 +139,7 @@ internal static class InteractiveCommand
         return 0;
     }
 
-    private static int Wrap(int index, int count) => (index % count + count) % count;
+    internal static int Wrap(int index, int count) => (index % count + count) % count;
 
     private static void Render(
         RoleTarget target,

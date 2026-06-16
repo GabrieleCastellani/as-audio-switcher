@@ -44,13 +44,35 @@ internal static class AudioDeviceService
             .ToArray();
     }
 
-    /// <summary>Finds a device by exact id, exact name, or partial name match.</summary>
-    public static AudioDevice? FindDevice(DataFlow flow, string nameOrId)
+    /// <summary>Finds a device by exact id, exact name, or unambiguous partial name match.</summary>
+    public static AudioDevice? FindDevice(DataFlow flow, string nameOrId) =>
+        Match(GetDevices(flow), nameOrId);
+
+    /// <summary>
+    /// Resolves a device from a candidate list. An exact id or name match always
+    /// wins; otherwise a partial (substring) name match is used, but only when it
+    /// is unambiguous. Returns null when nothing matches or the substring is
+    /// ambiguous, so an exact match can never be shadowed by a partial one.
+    /// </summary>
+    internal static AudioDevice? Match(IReadOnlyList<AudioDevice> devices, string nameOrId)
     {
-        return GetDevices(flow).FirstOrDefault(device =>
+        var exact = devices.FirstOrDefault(device =>
             string.Equals(device.Id, nameOrId, StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(device.Name, nameOrId, StringComparison.OrdinalIgnoreCase) ||
-            device.Name.Contains(nameOrId, StringComparison.OrdinalIgnoreCase));
+            string.Equals(device.Name, nameOrId, StringComparison.OrdinalIgnoreCase));
+        if (exact is not null)
+            return exact;
+
+        AudioDevice? partial = null;
+        foreach (var device in devices)
+        {
+            if (!device.Name.Contains(nameOrId, StringComparison.OrdinalIgnoreCase))
+                continue;
+            if (partial is not null)
+                return null; // ambiguous: more than one substring match
+            partial = device;
+        }
+
+        return partial;
     }
 
     /// <summary>Makes <paramref name="device"/> the default for the requested role slot(s).</summary>

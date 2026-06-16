@@ -140,6 +140,33 @@ public class CliFormatTests
         Assert.StartsWith(CliFormat.Executable + " set", line);
     }
 
+    [Fact]
+    public void BuildSetCommandLine_NameWithEmbeddedQuotes_IsEscapedAndQuoted()
+    {
+        var line = CliFormat.BuildSetCommandLine("Bose \"QC\" Headset", null, RoleTarget.All);
+        Assert.Equal(@".\as.exe set --playback ""Bose \""QC\"" Headset""", line);
+    }
+
+    [Fact]
+    public void BuildSetCommandLine_NameWithQuoteButNoSpace_IsQuoted()
+    {
+        var line = CliFormat.BuildSetCommandLine("Spk\"r", null, RoleTarget.All);
+        Assert.Equal(@".\as.exe set --playback ""Spk\""r""", line);
+    }
+
+    // ---- InnermostMessage ---------------------------------------------------
+
+    [Fact]
+    public void InnermostMessage_NoInner_ReturnsOwnMessage() =>
+        Assert.Equal("top", CliFormat.InnermostMessage(new Exception("top")));
+
+    [Fact]
+    public void InnermostMessage_NestedExceptions_ReturnsDeepestMessage()
+    {
+        var ex = new Exception("outer", new InvalidOperationException("middle", new("root")));
+        Assert.Equal("root", CliFormat.InnermostMessage(ex));
+    }
+
     // ---- ResolveTarget ------------------------------------------------------
 
     [Fact]

@@ -79,6 +79,20 @@ internal static class CliFormat
         return string.Join(' ', parts);
     }
 
-    private static string Quote(string value) =>
-        value.Contains(' ') ? $"\"{value}\"" : value;
+    private static string Quote(string value)
+    {
+        var needsQuoting = value.Contains(' ') || value.Contains('"');
+        if (!needsQuoting)
+            return value;
+
+        return $"\"{value.Replace("\"", "\\\"")}\"";
+    }
+
+    /// <summary>
+    /// Returns the message of the deepest inner exception. Core Audio calls surface
+    /// as wrapped <see cref="System.Runtime.InteropServices.COMException"/>s whose
+    /// outer message is generic, so the innermost message is the most informative.
+    /// </summary>
+    public static string InnermostMessage(Exception ex) =>
+        ex.InnerException is { } inner ? InnermostMessage(inner) : ex.Message;
 }

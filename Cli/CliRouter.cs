@@ -1,3 +1,5 @@
+using System.Reflection;
+
 using Spectre.Console;
 
 namespace AudioSwitcher.Cli;
@@ -5,7 +7,10 @@ namespace AudioSwitcher.Cli;
 /// <summary>Parses the command line and dispatches to the matching command.</summary>
 internal static class CliRouter
 {
-    private const string Version = "1.0.0";
+    // Sourced from the assembly version (driven by the csproj <Version>) so the
+    // reported version always matches the released build.
+    internal static readonly string Version =
+        (typeof(CliRouter).Assembly.GetName().Version ?? new Version(0, 0, 0)).ToString(3);
 
     public static int Run(string[] args)
     {
