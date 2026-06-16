@@ -154,7 +154,7 @@ dotnet publish -c Release
 The executable is written to:
 
 ```text
-bin/x64/Release/net10.0-windows/win-x64/publish/as.exe
+bin/Release/net10.0-windows/win-x64/publish/as.exe
 ```
 
 ### Prerequisites
@@ -171,9 +171,11 @@ Publish from a *Developer Command Prompt / Developer PowerShell for VS* (or run
 ## 🧪 Tests
 
 Unit tests live in [`AudioSwitcher.Tests/`](AudioSwitcher.Tests) (xUnit) and cover the pure
-CLI presentation logic in `CliFormat` — labels, icons, role-target resolution, and the
-copy-pasteable `set` command-line builder. The Core Audio COM layers require a real audio
-endpoint and are exercised manually.
+logic of the app: `CliFormat` (labels, icons, role-target resolution, the copy-pasteable
+`set` command-line builder, and innermost-error extraction), device name/ID matching in
+`AudioDeviceService` (exact wins over partial, ambiguous partial matches are rejected), the
+reported version, and the interactive picker helpers (`Wrap`, `BuildItems`, `InitialCursor`).
+The Core Audio COM layers require a real audio endpoint and are exercised manually.
 
 ```powershell
 dotnet test AudioSwitcher.slnx

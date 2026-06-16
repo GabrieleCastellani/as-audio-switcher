@@ -1,0 +1,41 @@
+name: CI
+
+# Build and test on every push to main and on pull requests, so regressions
+# are caught before a release tag is ever cut.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: Build & test
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore AudioSwitcher.slnx
+
+      - name: Build
+        run: dotnet build AudioSwitcher.slnx -c Release --no-restore
+
+      - name: Test
+        run: dotnet test AudioSwitcher.slnx -c Release --no-build --verbosity normal
