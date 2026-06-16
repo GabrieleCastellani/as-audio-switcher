@@ -1,0 +1,116 @@
+name: Release
+
+# Publish a native AOT build of as.exe and attach it to a GitHub Release
+# whenever a semantic-version tag (e.g. v1.2.3) is pushed. The workflow can
+# also be run manually to validate the build without creating a release.
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'        # v1.2.3
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'      # v1.2.3-rc.1
+  workflow_dispatch:
+
+# Least-privilege by default; only the release job is granted write access.
+permissions:
+  contents: read
+
+# A given ref should only have one release run in flight at a time.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build, test & publish
+    runs-on: windows-latest          # AOT needs the MSVC toolchain & Windows SDK
+    permissions:
+      contents: write                # required to create the GitHub Release
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0             # full history so release notes can diff tags
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Resolve version
+        id: version
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF -like 'refs/tags/v*') {
+            $version = $env:GITHUB_REF -replace '^refs/tags/v', ''
+            $release = 'true'
+          } else {
+            $version = '0.0.0-dev'
+            $release = 'false'
+          }
+          "version=$version"            >> $env:GITHUB_OUTPUT
+          "release=$release"           >> $env:GITHUB_OUTPUT
+          Write-Host "Building version $version (release=$release)"
+
+      - name: Restore
+        run: dotnet restore AudioSwitcher.slnx
+
+      - name: Build
+        run: dotnet build AudioSwitcher.slnx -c Release --no-restore -p:Version=${{ steps.version.outputs.version }}
+
+      - name: Test
+        run: dotnet test AudioSwitcher.slnx -c Release --no-build --verbosity normal
+
+      - name: Publish (Native AOT)
+        run: >
+          dotnet publish AudioSwitcher.csproj -c Release
+          -p:Version=${{ steps.version.outputs.version }}
+          -o artifacts/publish
+
+      - name: Package
+        id: package
+        shell: pwsh
+        run: |
+          $version = '${{ steps.version.outputs.version }}'
+          $staging = 'artifacts/staging'
+          New-Item -ItemType Directory -Force $staging | Out-Null
+
+          Copy-Item artifacts/publish/as.exe $staging/
+          Copy-Item README.md $staging/ -ErrorAction SilentlyContinue
+
+          $zip = "artifacts/AudioSwitcher-$version-win-x64.zip"
+          Compress-Archive -Path "$staging/*" -DestinationPath $zip -Force
+
+          # SHA256 checksums for the distributed files.
+          $checksums = "artifacts/checksums.txt"
+          Get-FileHash artifacts/publish/as.exe, $zip -Algorithm SHA256 |
+            ForEach-Object { "{0}  {1}" -f $_.Hash.ToLower(), (Split-Path $_.Path -Leaf) } |
+            Set-Content $checksums -Encoding ascii
+
+          Get-Content $checksums
+          "zip=$zip" >> $env:GITHUB_OUTPUT
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: as-win-x64
+          path: |
+            artifacts/publish/as.exe
+            ${{ steps.package.outputs.zip }}
+            artifacts/checksums.txt
+          if-no-files-found: error
+
+      - name: Create GitHub Release
+        if: steps.version.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          gh release create '${{ github.ref_name }}' `
+            artifacts/publish/as.exe `
+            '${{ steps.package.outputs.zip }}' `
+            artifacts/checksums.txt `
+            --title '${{ github.ref_name }}' `
+            --generate-notes `
+            --verify-tag

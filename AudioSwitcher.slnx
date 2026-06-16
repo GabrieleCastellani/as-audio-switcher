@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="AudioSwitcher.csproj" />
+  <Project Path="AudioSwitcher.Tests/AudioSwitcher.Tests.csproj" />
+</Solution>

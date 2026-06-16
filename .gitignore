@@ -1,0 +1,21 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+[Pp]ublish/
+artifacts/
+
+# Rider / Visual Studio / VS Code
+.vs/
+.idea/
+*.user
+*.suo
+
+# Test results
+[Tt]est[Rr]esults/
+*.trx
+coverage*.xml
+*.coverage
+
+# OS noise
+Thumbs.db
+.DS_Store
