@@ -75,6 +75,16 @@ internal static class AudioDeviceService
         return partial;
     }
 
+    /// <summary>
+    /// Picks which of two devices a toggle should switch to, given the id of the
+    /// current default. When the current default is <paramref name="deviceA"/> we
+    /// flip to <paramref name="deviceB"/>; otherwise (the current default is
+    /// <paramref name="deviceB"/>, some unrelated device, or nothing) we land on
+    /// <paramref name="deviceA"/>, the first listed "home" device.
+    /// </summary>
+    internal static AudioDevice SelectToggleTarget(string? currentDefaultId, AudioDevice deviceA, AudioDevice deviceB) =>
+        string.Equals(currentDefaultId, deviceA.Id, StringComparison.OrdinalIgnoreCase) ? deviceB : deviceA;
+
     /// <summary>Makes <paramref name="device"/> the default for the requested role slot(s).</summary>
     public static void SetDefault(AudioDevice device, RoleTarget target = RoleTarget.All)
     {

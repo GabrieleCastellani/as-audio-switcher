@@ -25,6 +25,7 @@ internal static class CliRouter
         {
             "list" => RunList(rest),
             "set" => RunSet(rest),
+            "toggle" => RunToggle(rest),
             "interactive" or "i" => InteractiveCommand.Run(),
             "-h" or "--help" or "help" => PrintHelp(),
             "-v" or "--version" or "version" => PrintVersion(),
@@ -93,6 +94,71 @@ internal static class CliRouter
         return SetCommand.Run(playback, recording, communications, defaultOnly);
     }
 
+    private static int RunToggle(string[] args)
+    {
+        string[]? playback = null;
+        string[]? recording = null;
+        var communications = false;
+        var defaultOnly = false;
+
+        for (var i = 0; i < args.Length; i++)
+        {
+            switch (args[i].ToLowerInvariant())
+            {
+                case "--playback":
+                    if (!TryReadPair(args, ref i, out playback))
+                        return MissingPair("--playback");
+                    break;
+                case "--recording":
+                    if (!TryReadPair(args, ref i, out recording))
+                        return MissingPair("--recording");
+                    break;
+                case "--communications" or "--comms":
+                    communications = true;
+                    break;
+                case "--default":
+                    defaultOnly = true;
+                    break;
+                case "-h" or "--help":
+                    return PrintHelp();
+                default:
+                    return UnknownOption("toggle", args[i]);
+            }
+        }
+
+        return ToggleCommand.Run(playback, recording, communications, defaultOnly);
+    }
+
+    /// <summary>
+    /// Reads the two device-name values that follow a toggle flow flag, advancing
+    /// <paramref name="index"/> past them. Tokens starting with <c>--</c> are
+    /// treated as the next option, not device names, so a missing second value is
+    /// reported instead of silently swallowing the following flag.
+    /// </summary>
+    internal static bool TryReadPair(string[] args, ref int index, out string[] values)
+    {
+        values = Array.Empty<string>();
+        var collected = new string[2];
+        var cursor = index;
+
+        for (var k = 0; k < 2; k++)
+        {
+            if (cursor + 1 >= args.Length)
+                return false;
+
+            var next = args[cursor + 1];
+            if (next.StartsWith("--", StringComparison.Ordinal))
+                return false;
+
+            collected[k] = next;
+            cursor++;
+        }
+
+        index = cursor;
+        values = collected;
+        return true;
+    }
+
     private static int PrintVersion()
     {
         AnsiConsole.WriteLine($"as {Version}");
@@ -118,6 +184,12 @@ internal static class CliRouter
         return 1;
     }
 
+    private static int MissingPair(string option)
+    {
+        AnsiConsole.MarkupLine($"[red]Option '[yellow]{option}[/]' requires two device names.[/]");
+        return 1;
+    }
+
     private static int PrintHelp()
     {
         AnsiConsole.MarkupLine("[bold cyan]as[/] — AudioSwitcher CLI");
@@ -127,6 +199,7 @@ internal static class CliRouter
         AnsiConsole.MarkupLine("  as i | interactive                 Launch interactive mode");
         AnsiConsole.MarkupLine("  as list [--playback] [--recording] List devices");
         AnsiConsole.MarkupLine("  as set [options]                   Set default device(s)");
+        AnsiConsole.MarkupLine("  as toggle [options]                Toggle default device(s) between two");
         AnsiConsole.MarkupLine("  as --help | --version              Show help or version");
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[bold]SET OPTIONS[/]");
@@ -136,9 +209,19 @@ internal static class CliRouter
         AnsiConsole.MarkupLine("  --comms               Alias of --communications");
         AnsiConsole.MarkupLine("  --default             Set only the multimedia default");
         AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLine("[bold]TOGGLE OPTIONS[/]");
+        AnsiConsole.MarkupLine("  --playback <a> <b>    Two playback devices to toggle between");
+        AnsiConsole.MarkupLine("  --recording <a> <b>   Two recording devices to toggle between");
+        AnsiConsole.MarkupLine("  --communications      Toggle only the default communication device");
+        AnsiConsole.MarkupLine("  --comms               Alias of --communications");
+        AnsiConsole.MarkupLine("  --default             Toggle only the multimedia default");
+        AnsiConsole.MarkupLine("  [grey]Switches to whichever device is not the current default (first device if neither).[/]");
+        AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[bold]EXAMPLES[/]");
         AnsiConsole.MarkupLine("  [grey]as set --playback \"Headphones\"[/]");
         AnsiConsole.MarkupLine("  [grey]as set --playback \"Headset\" --recording \"Headset Mic\" --communications[/]");
+        AnsiConsole.MarkupLine("  [grey]as toggle --playback \"Speakers\" \"Headphones\"[/]");
+        AnsiConsole.MarkupLine("  [grey]as toggle --playback \"Speakers\" \"Headphones\" --recording \"Webcam Mic\" \"Headset Mic\"[/]");
         return 0;
     }
 }
