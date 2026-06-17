@@ -34,7 +34,7 @@ No GUI clicking, no settings panels. Just `as set --playback "Headphones"` and y
 
 ## 📑 Table of contents
 
-- [Demo](#-demo)
+
 - [Install](#-install)
 - [Quick start](#-quick-start)
 - [Commands](#-commands)
@@ -49,26 +49,7 @@ No GUI clicking, no settings panels. Just `as set --playback "Headphones"` and y
 - [Project structure](#-project-structure)
 - [License](#-license)
 
-## 🎬 Demo
 
-```text
-> as list --playback
-
-🔊 Playback devices
-╭───┬──────────────────────────────────┬──────────┬─────────┬───────┬─────────────────╮
-│ # │ Device                           │ Type     │ Default │ Comms │ ID              │
-├───┼──────────────────────────────────┼──────────┼─────────┼───────┼─────────────────┤
-│ 1 │ Headset Earphone (Jabra Link 380)│ Playback │ ●       │ ●     │ {0.0.0...}.{7b… │
-│ 2 │ LG HDR DQHD (NVIDIA HD Audio)    │ Playback │         │       │ {0.0.0...}.{90… │
-│ 3 │ Speakers (Realtek(R) Audio)      │ Playback │         │       │ {0.0.0...}.{33… │
-╰───┴──────────────────────────────────┴──────────┴─────────┴───────┴─────────────────╯
-```
-
-```powershell
-> as set --playback "Speakers" --recording "Headset Mic"
-Switched playback default and communications device to Speakers
-Switched recording default and communications device to Headset Mic
-```
 
 ## 📥 Install
 
