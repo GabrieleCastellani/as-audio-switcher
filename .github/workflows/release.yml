@@ -29,7 +29,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0             # full history so release notes can diff tags
 
@@ -92,7 +92,7 @@ jobs:
           "zip=$zip" >> $env:GITHUB_OUTPUT
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: as-win-x64
           path: |
