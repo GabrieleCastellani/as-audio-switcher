@@ -154,8 +154,9 @@ internal static class InteractiveCommand
         AnsiConsole.MarkupLine($"Changing: [bold]{CliFormat.TargetLabel(target)}[/] device(s)");
         AnsiConsole.WriteLine();
 
-        var playbackPanel = BuildColumnPanel("🔊 Playback", playbackItems, playbackCursor, active: activeColumn == 0, target);
-        var recordingPanel = BuildColumnPanel("🎙 Recording", recordingItems, recordingCursor, active: activeColumn == 1, target);
+        var columnRows = Math.Max(playbackItems.Count, recordingItems.Count);
+        var playbackPanel = BuildColumnPanel("🔊 Playback", playbackItems, playbackCursor, active: activeColumn == 0, target, columnRows);
+        var recordingPanel = BuildColumnPanel("🎙 Recording", recordingItems, recordingCursor, active: activeColumn == 1, target, columnRows);
         AnsiConsole.Write(new Columns(playbackPanel, recordingPanel).Collapse());
 
         var command = CliFormat.BuildSetCommandLine(
@@ -181,7 +182,8 @@ internal static class InteractiveCommand
         IReadOnlyList<AudioDevice?> items,
         int cursor,
         bool active,
-        RoleTarget target)
+        RoleTarget target,
+        int minRows)
     {
         var lines = new List<string>();
         for (var i = 0; i < items.Count; i++)
@@ -214,6 +216,9 @@ internal static class InteractiveCommand
 
             lines.Add(label);
         }
+
+        while (lines.Count < minRows)
+            lines.Add("  ");
 
         return new Panel(string.Join('\n', lines))
             .Header(active ? $"[bold cyan]{header} ◄[/]" : $"[bold]{header}[/]")
