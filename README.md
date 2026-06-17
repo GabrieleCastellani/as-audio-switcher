@@ -27,6 +27,7 @@ No GUI clicking, no settings panels. Just `as set --playback "Headphones"` and y
 
 - 🔊 **List** every active playback & recording device, with the current **Default** and **Communications** defaults clearly marked.
 - ⚡ **Switch** the default output/input device by full name, partial name, or device ID — case-insensitive.
+- 🔁 **Toggle** a flow between two devices with one command — perfect for a hotkey that flips speakers ↔ headphones.
 - 🎚️ **Two default slots, your choice** — target the multimedia **Default Device**, the **Communications** device, or both at once.
 - 🖥️ **Interactive picker** — a guided two-column TUI that builds the exact command line for you to copy into scripts.
 - 📦 **Single native binary** — Native AOT produces a ~3 MB `as.exe` with **zero .NET runtime dependency**.
@@ -39,6 +40,7 @@ No GUI clicking, no settings panels. Just `as set --playback "Headphones"` and y
 - [Commands](#-commands)
   - [`as list`](#as-list)
   - [`as set`](#as-set)
+  - [`as toggle`](#as-toggle)
   - [`as interactive`](#as-interactive)
 - [How Windows defaults work](#-how-windows-defaults-work)
 - [Build from source](#-build-from-source)
@@ -90,6 +92,7 @@ as set --recording "USB Microphone"                  # set the default recording
 as set --playback "Headphones" --recording "USB Mic" # set both in one go
 as set --playback "Headset" --communications         # set only the comms default
 as set --playback "Speakers" --default               # set only the multimedia default
+as toggle --playback "Speakers" "Headphones"         # flip playback between two devices
 ```
 
 Device matching is **case-insensitive** and accepts a full name, a partial name, or the device ID.
@@ -120,6 +123,34 @@ Sets the default playback and/or recording device.
 
 Provide `--playback`, `--recording`, or both. If neither `--communications` nor
 `--default` is given, **every role is set at once**.
+
+### `as toggle`
+
+Flips the default playback and/or recording device **between two devices**. Pass two
+names (or IDs) per flow; `toggle` reads the current default and switches to whichever
+of the two is *not* currently active — ideal for binding to a single hotkey.
+
+| Option                        | Description                                                  |
+| ----------------------------- | ------------------------------------------------------------ |
+| `--playback <a> <b>`          | Two playback (output) devices to toggle between              |
+| `--recording <a> <b>`         | Two recording (input) devices to toggle between              |
+| `--communications`, `--comms` | Toggle only the default **communication** device             |
+| `--default`                   | Toggle only the **multimedia** default (Console + Multimedia)|
+
+Provide `--playback`, `--recording`, or both. The role flags work exactly as they do
+for `as set`; omitting them toggles every role at once.
+
+**How the target is chosen:** if the current default is the first device, `toggle`
+switches to the second; if it's the second, it switches back to the first; if it's
+**neither** (some other device, or nothing), it switches to the **first** device.
+
+```powershell
+> as toggle --playback "Speakers" "Headphones"
+Toggled playback default and communications device from Speakers to Headphones
+
+> as toggle --playback "Speakers" "Headphones"
+Toggled playback default and communications device from Headphones to Speakers
+```
 
 ### `as interactive`
 
@@ -180,7 +211,8 @@ Unit tests live in [`AudioSwitcher.Tests/`](AudioSwitcher.Tests) (xUnit) and cov
 logic of the app: `CliFormat` (labels, icons, role-target resolution, the copy-pasteable
 `set` command-line builder, and innermost-error extraction), device name/ID matching in
 `AudioDeviceService` (exact wins over partial, ambiguous partial matches are rejected), the
-reported version, and the interactive picker helpers (`Wrap`, `BuildItems`, `InitialCursor`).
+toggle selection logic and two-value flag parser, the reported version, and the interactive
+picker helpers (`Wrap`, `BuildItems`, `InitialCursor`).
 The Core Audio COM layers require a real audio endpoint and are exercised manually.
 
 ```powershell
@@ -211,7 +243,7 @@ The code is organised by responsibility:
 | ------------- | ----------------------------------------------------------------------------------------- |
 | `Interop/`    | Native Core Audio COM glue: `NativeEnums`, `NativeTypes`, `ComInterfaces`, `CoreAudio`.    |
 | `Audio/`      | Device model and logic: `AudioDevice`, `RoleTarget`, `AudioDeviceService`.                 |
-| `Cli/`        | Command-line layer: `CliRouter`, `CliFormat`, and the `List`/`Set`/`Interactive` commands. |
+| `Cli/`        | Command-line layer: `CliRouter`, `CliFormat`, and the `List`/`Set`/`Toggle`/`Interactive` commands. |
 | `Program.cs`  | Entry point — hands the arguments to `CliRouter`.                                          |
 | `AudioSwitcher.Tests/` | xUnit test project.                                                              |
 
