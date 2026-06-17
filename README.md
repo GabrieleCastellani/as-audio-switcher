@@ -13,10 +13,15 @@ No GUI clicking, no settings panels. Just `as set --playback "Headphones"` and y
 ![No runtime](https://img.shields.io/badge/runtime-none%20required-brightgreen)
 ![Built with](https://img.shields.io/badge/built%20with-Spectre.Console-ff69b4)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![GitHub Copilot](https://img.shields.io/badge/developed%20with-GitHub%20Copilot%20%26%20Claude%20Opus%204.8-8957e5?logo=githubcopilot&logoColor=white)
 
 </div>
 
 ---
+
+<div align="center">
+  <img src="docs/interactive.png" alt="AudioSwitcher interactive picker — two-column 🔊 Playback · 🎙 Recording screen" width="700" />
+</div>
 
 ## ✨ Highlights
 
@@ -217,5 +222,5 @@ Released under the [MIT License](LICENSE). © 2026 Gabriele Castellani.
 ---
 
 <div align="center">
-<sub>Built for Windows with ❤️ and <a href="https://spectreconsole.net/">Spectre.Console</a> · Native AOT</sub>
+<sub>Built for Windows with ❤️ and <a href="https://spectreconsole.net/">Spectre.Console</a> · Developed with <a href="https://github.com/features/copilot">GitHub Copilot</a> &amp; Claude Opus 4.8 · Inspired by <a href="https://github.com/naudio/NAudio">NAudio</a> · Native AOT</sub>
 </div>
